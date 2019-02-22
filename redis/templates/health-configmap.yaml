@@ -3,9 +3,9 @@ kind: ConfigMap
 metadata:
   labels:
     app.kubernetes.io/name: {{ include "redis.name" . }}
-      helm.sh/chart: {{ include "redis.chart" . }}
-      app.kubernetes.io/instance: {{ .Release.Name }}
-      app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "redis.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
   name: redis-health
 data:
   ping_local.sh: |-
