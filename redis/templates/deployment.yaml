@@ -59,7 +59,7 @@ spec:
             failureThreshold: 5
             exec:
               command:
-              - redis-client -a "$REDIS_PASSWORD" -p $REDIS_PORT ping
+              - redis-client -a "${REDIS_PASSWORD}" -p ${REDIS_PORT} ping
           readinessProbe:
             initialDelaySeconds: 5
             periodSeconds: 10
@@ -68,7 +68,7 @@ spec:
             failureThreshold: 5
             exec:
               command:
-              - redis-client -a "$REDIS_PASSWORD" -p $REDIS_PORT ping
+              - redis-client -a "${REDIS_PASSWORD}" -p ${REDIS_PORT} ping
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
