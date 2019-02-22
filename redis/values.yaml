@@ -1,45 +1,31 @@
-# Default values for redis.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
 replicaCount: 1
 
 image:
-  repository: nginx
-  tag: stable
+  repository: redis
+  tag: 5.0.3
   pullPolicy: IfNotPresent
 
 nameOverride: ""
 fullnameOverride: ""
+usePassword: true
+password: null
+
+persistence:
+  storage: 10Gi
+  storageClass: null
+  accessModes: [ReadWriteOnce]
 
 service:
   type: ClusterIP
-  port: 80
+  port: 6379
 
-ingress:
-  enabled: false
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  paths: []
-  hosts:
-    - chart-example.local
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
-
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+resources:
   # limits:
   #  cpu: 100m
   #  memory: 128Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
+   requests:
+    cpu: 100m
+    memory: 100Mi
 
 nodeSelector: {}
 

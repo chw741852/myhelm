@@ -23,20 +23,63 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            {{- if .Values.usePassword }}
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: redis-password
+            {{- else }}
+            - name: ALLOW_EMPTY_PASSWORD
+              value: "yes"
+            {{- end }}
+            - name: REDIS_PORT
+              value: "6379"
+          command:
+          - /bin/bash
+          - -c
+          - |
+            ARGS=("--port" "${REDIS_PORT}")
+            {{- if .Values.usePassword }}
+            ARGS+=("--requirepass" "${REDIS_PASSWORD}")
+            {{- else }}
+            ARGS+=("--protected-mode" "no")
+            {{- end }}
+            redis-server "${ARGS[@]}"
           ports:
-            - name: http
-              containerPort: 80
+            - name: redis
+              containerPort: 6379
               protocol: TCP
           livenessProbe:
-            httpGet:
-              path: /
-              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 5
+            exec:
+              command:
+              - /bin/bash
+              - -c
+              - |
+                redis-client -a "$REDIS_PASSWORD" -p $REDIS_PORT ping
           readinessProbe:
-            httpGet:
-              path: /
-              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 5
+            exec:
+              command:
+              - /bin/bash
+              - -c
+              - |
+                redis-client -a "$REDIS_PASSWORD" -p $REDIS_PORT ping
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -49,3 +92,17 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-data
+      spec:
+        accessModes:
+        {{- range .Values.persistence.accessModes }}
+        - {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.storage }}
+        {{- if .Values.persistence.storageClass }}
+        storageClassName: {{ .Values.persistence.storageClass }}
+        {{- end }}
