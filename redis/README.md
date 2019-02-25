@@ -1,4 +1,7 @@
 ## 启动
-> helm install redis --name myredis \
+```shell
+helm install redis --name myredis \
  --set persistence.storage=1Gi \
- --set passowrd=password \
+ --set passowrd=password
+```
+
