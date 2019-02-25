@@ -41,7 +41,7 @@ spec:
             - name: nexus-data
               mountPath: /nexus-data
       volumes:
-        - name: redis-data
+        - name: nexus-data
           persistentVolumeClaim:
             claimName: nexus-data
       {{- with .Values.nodeSelector }}
