@@ -26,6 +26,9 @@ env:
 contextPath: nexus
 port: 8081
 
+livenessProbe:
+  initialDelaySeconds: 180
+
 service:
   type: ClusterIP
   port: 80
