@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "nexus.fullname" . }}
+  name: {{ include "activemq.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ include "nexus.name" . }}
-    helm.sh/chart: {{ include "nexus.chart" . }}
+    app.kubernetes.io/name: {{ include "activemq.name" . }}
+    helm.sh/chart: {{ include "activemq.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "nexus.name" . }}
+      app.kubernetes.io/name: {{ include "activemq.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "nexus.name" . }}
+        app.kubernetes.io/name: {{ include "activemq.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
@@ -25,37 +25,28 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.port }}
+              containerPort: 80
               protocol: TCP
           livenessProbe:
-            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            initialDelaySeconds: 30
             periodSeconds: 30
             timeoutSeconds: 5
             successThreshold: 1
             failureThreshold: 5
             httpGet:
-              path: {{ .Values.contextPath }}
+              path: /
               port: http
-            readinessProbe:
-              initialDelaySeconds: 5
-              periodSeconds: 10
-              timeoutSeconds: 5
-              successThreshold: 1
-              failureThreshold: 5
-              httpGet:
-                path: {{ .Values.contextPath }}
-                port: http
-          env:
-            {{- toYaml .Values.env | nindent 12 }}
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 5
+            httpGet:
+              path: /
+              port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          volumeMounts:
-            - name: nexus-data
-              mountPath: /nexus-data
-      volumes:
-        - name: nexus-data
-          persistentVolumeClaim:
-            claimName: nexus-data
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
